@@ -13,7 +13,7 @@ body{
     border-radius: 3px;
 }
 #bodyLeft{
-    width: 24%;
+    width: 17%;
     height: 500px;
     background: #002f40;
     margin: 20px 10px 10px 0px;
@@ -51,7 +51,7 @@ body{
 }
 /* Body Right */
 #bodyRight{
-    width: 75.2%;
+    width: 82%;
     min-height: 025rem;
     background: #4887c5;
     margin: 20px 0px 10px 0px;

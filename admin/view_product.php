@@ -11,10 +11,10 @@
             <th>Quản lý</th>
             <th>Tên sản phẩm</th>
             <th>Ảnh sản phẩm</th>
-            <th>Giới thiệu 1</th>
-            <th>Giới thiệu 2</th>
-            <th>Giới thiệu 3</th>
-            <th>Giới thiệu 4</th>
+            <th>Mô tả 1</th>
+            <th>Mô tả 2</th>
+            <th>Mô tả 3</th>
+            <th>Mô tả 4</th>
             <th>Giá (vnđ)</th>
             <th>Số hiệu sản phẩm</th>
             <th>Bảo hành</th>

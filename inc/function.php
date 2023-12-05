@@ -1,4 +1,51 @@
 <?php 
+    function user_login() {
+        require 'db_config.php';
+    
+        if (isset($_POST['login'])) {
+            $formError = false;
+    
+            $u_email = strip_tags($_POST['email']);
+            $u_email = htmlspecialchars($u_email);
+    
+            $u_password = strip_tags($_POST['password']);
+            $u_password = htmlspecialchars($u_password);
+    
+            // Fetch user data from the database
+            $stmt = $con->prepare("SELECT * FROM users WHERE email = :email");
+            $stmt->bindParam(':email', $u_email);
+            $stmt->setFetchMode(PDO::FETCH_ASSOC);
+            $stmt->execute();
+    
+            if ($stmt->rowCount() > 0) {
+                $row = $stmt->fetch();
+                $hashed_password_from_db = $row['password'];
+    
+
+                if (password_verify($u_password, $hashed_password_from_db)) {
+                    session_start();
+                    $_SESSION['user_id'] = $row['user_id'];
+                    $_SESSION['user_email'] = $u_email;
+                    $_SESSION['username'] = $row['user_name'];
+    
+                    echo "<script>alert('Xin chào " .$row['user_name']."')</script>";
+                    echo "<script>window.open('index.php', '_self')</script>";
+                } else {
+                    // Password is incorrect
+                    echo "<script>alert('Incorrect password')</script>";
+                    // Handle the error, maybe redirect back to the login form
+                }
+            } else {
+                // User with the given email does not exist
+                echo "<script>alert('Email not registered')</script>";
+                // Handle the error, maybe redirect back to the login form
+            }
+        }
+    }
+    
+    
+    
+
     function user_signup(){
         require 'db_config.php';
         if(isset($_POST['u_signup'])){
@@ -8,6 +55,12 @@
 
         $u_email = strip_tags($_POST['u_email']);
         $u_email = htmlspecialchars($u_email);
+
+        if ($_POST['u_password'] !== $_POST['u_confirm_password']) {
+            $u_password = strip_tags($_POST['u_password']);
+            echo "<script>alert('Password and confirmation do not match')</script>";
+            exit;
+        }
 
         $u_city = strip_tags($_POST['u_city']);
         $u_city = htmlspecialchars($u_city);
@@ -35,7 +88,8 @@
             $stmt->bindParam(':address', $u_address);
             $stmt->bindParam(':dob', $u_dob);
             $stmt->bindParam(':phone', $u_phone);
-            $stmt->bindParam(':pass', $u_password);
+            $hashed_password = password_hash($_POST['u_password'], PASSWORD_DEFAULT);
+            $stmt->bindParam(':pass', $hashed_password);
             $stmt->bindParam(':regdate', $today);
             if($stmt->execute()){  
                 echo "<script>alert('Tài khoản đăng kí thành công!')</script>";
@@ -70,8 +124,8 @@
                 <img src = './img/products_img/".$result['img1']."' alt = 'img'>
                 <h4 id = 'c_price'><small>GHC".$result['price']."</small></h4>
                 <center>
-                    <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$result['pro_id']."'>Xem</a></button>
-                    <button class = 'p_btn'id = 'cart'><a href = '#'>Giỏ hàng</a></button>
+
+                    <button name='cart_btn' class = 'add-to-cart-btn'id = 'cart'><a href = '#'>Giỏ hàng</a></button>
                     <button class = 'p_btn'id = 'wish'><a href = '#'>Danh sách yêu thích</a></button>
                 </center>
                 </a>
@@ -81,159 +135,8 @@
         }
         }
     }
-    
-    function crockery(){
-        require 'db_config.php';
-        $stmt = $con->prepare("SELECT * FROM main_cat WHERE cat_id = 21");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-        $stmt->execute();
-        $row = $stmt->fetch();
-        $cat_id = $row['cat_id'];
-        echo "<h3>".$row['category_name']."</h3>";
-        $stmt = $con->prepare("SELECT * FROM products WHERE cat_id = $cat_id ");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-        $stmt->execute();
-        while($row = $stmt->fetch()):
-            echo "<li>
-                    <form method='POST' enctype='multipart/form-data'>
-                        <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                        <h4>".$row['product_name']."</h4>
-                        <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                        <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
-                        <center>
-                            <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
-                            <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Thêm giỏ hàng</button>
-                            <button class = 'p_btn'id = 'wish'><a href = '#'>Yêu thích</a></button>
-                        </center>
-                        </a>
-                    </form>
-                    </li>";
-            echo "";
-        endwhile;
-    }
-    function electronics(){
-        require 'db_config.php';
-        $stmt = $con->prepare("SELECT * FROM main_cat WHERE cat_id = 1");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-        $stmt->execute();
-        $row = $stmt->fetch();
-        $cat_id = $row['cat_id'];
-        echo "<h3>".$row['category_name']."</h3>";
-        $stmt = $con->prepare("SELECT * FROM products WHERE cat_id = $cat_id ");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-        $stmt->execute();
-        while($row = $stmt->fetch()):
-            echo "<li>
-                    <form method='post' enctype='multipart/form-data'>
-                        <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                        <h4>".$row['product_name']."</h4>
-                        <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                        <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
-                        <center>
-                            <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
-                            <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Thêm giỏ hàng</button>
-                            <button class = 'p_btn'id = 'wish'><a href = '#'>Yêu thích</a></button>
-                        </center>
-                        </a>
-                    </form>
-                    </li>";
-            echo "";
-        endwhile;
-    }
-    function computers(){
-        require 'db_config.php';
-        $stmt = $con->prepare("SELECT * FROM main_cat WHERE cat_id = 18");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-        $stmt->execute();
-        $row = $stmt->fetch();
-        $cat_id = $row['cat_id'];
-        echo "<h3>".$row['category_name']."</h3>";
 
-        $stmt = $con->prepare("SELECT * FROM products WHERE cat_id = $cat_id ");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-        $stmt->execute();
-        while($row = $stmt->fetch()):
-            echo "<li>
-                    <form method='POST' enctype='multipart/form-data'>
-                        <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                        <h4>".$row['product_name']."</h4>
-                        <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                        <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
-                        <center>
-                            <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
-                            <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Thêm giỏ hàng</button>
-                            <button class = 'p_btn'id = 'wish'><a href = '#'>Yêu thích</a></button>
-                        </center>
-                        </a>
-                    </form>
-                    </li>";
-            echo "";
-        endwhile;
-    }
-    function cloths(){
-        require 'db_config.php';
-        $stmt = $con->prepare("SELECT * FROM main_cat WHERE cat_id = 19");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-        $stmt->execute();
-        $row = $stmt->fetch();
-        $cat_id = $row['cat_id'];
-        echo "<h3>".$row['category_name']."</h3>";
-
-        $stmt = $con->prepare("SELECT * FROM products WHERE cat_id = $cat_id ");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-        $stmt->execute();
-        while($row = $stmt->fetch()):
-            echo "<li>
-                    <form method='POST' enctype='multipart/form-data'>
-                        <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                        <h4>".$row['product_name']."</h4>
-                        <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                        <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
-                        <center>
-                            <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>View</a></button>
-                            <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
-                            <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Cart</button>
-                            <button class = 'p_btn'id = 'wish'><a href = '#'>Wishlist</a></button>
-                        </center>
-                        </a>
-                    </form>
-                    </li>";
-            echo "";
-        endwhile;
-    }
-    function gadgets(){
-        require 'db_config.php';
-        $stmt = $con->prepare("SELECT * FROM main_cat WHERE cat_id = 26");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-        $stmt->execute();
-        $row = $stmt->fetch();
-        $cat_id = $row['cat_id'];
-        echo "<h3>".$row['category_name']."</h3>";
-
-        $stmt = $con->prepare("SELECT * FROM products WHERE cat_id = $cat_id ");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-        $stmt->execute();
-        while($row = $stmt->fetch()):
-            echo "<li>
-                    <form method='POST' enctype='multipart/form-data'>
-                        <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                        <h4>".$row['product_name']."</h4>
-                        <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                        <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
-                        <center>
-                            <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>View</a></button>
-                            <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
-                            <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Cart</button>
-                            <button class = 'p_btn'id = 'wish'><a href = '#'>Wishlist</a></button>
-                        </center>
-                        </a>
-                    </form>
-                    </li>";
-            echo "";
-        endwhile;
-    }
-
-    function pro_details(){
+    function pro_details($user_id){
         require 'db_config.php';
         if(isset($_GET['pro_id'])){
             $product_id = $_GET['pro_id'];
@@ -254,7 +157,7 @@
             </div>
             <div id = 'pro_feature'>
                 <h3>".$row['product_name']."</h3><hr/>
-                <p>Features</p>
+                <p>Mô tả sản phẩm</p>
                 <ul>
                     <li>".$row['feature1']."</li>
                     <li>".$row['feature2']."</li>
@@ -262,25 +165,24 @@
                     <li>".$row['feature4']."</li>
                 </ul>
                 <ul>
-                    <li><span>Model: </span>".$row['pro_model']."</li>
-                    <li><span>Warranty: </span>".$row['warranty']."</li>
-                    <li><span>Date Modified: </span> ".$row['date_added']."</li>
+                    <li><span>Mẫu mã: </span>".$row['pro_model']."</li>
+                    <li><span>Bảo hành: </span>".$row['warranty']."</li>
 
                 </ul><br clear = 'all'>
                 <center>
-                <h3>Selling Price: GHC".$row['price']."</h3>
+                <h3>Giá bán: ".$row['price']."</h3>
                 <form method = 'POST'>
                     <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
-                    <button type = 'Submit' name = 'buy' id = 'buy'>Buy Now</button>
-                    <button type = 'Submit' name = 'cart_btn'id = 'cart'><i class = \"pe-7s-cart\"></i>Add To Cart</button>
+                    <button type = 'Submit' name = 'buy' id = 'buy'>Mua ngay</button>
+                    <button type = 'Submit' name = 'cart_btn'id = 'cart' class='add-to-cart-btn'><i class = \"pe-7s-cart\"></i>Thêm giỏ hàng</button>
                 </form>
                 </center>
             </div><br clear = 'all'>
             <div id = 'sim_pro'>
-            <h3>Related Products</h3>
+            <h3>Các sản phẩm tương tự</h3>
             <ul>
             ";
-            add_cart();
+            add_cart($user_id);
             $cat_id = $row['cat_id'];
             $pro_id = $row['pro_id'];
             $stmt = $con->prepare("SELECT * FROM products where pro_id <> $pro_id AND  cat_id =  $cat_id order by pro_id DESC");
@@ -293,17 +195,64 @@
                     <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
                             <img src = 'img/products_img/".$row['img1']."'>
                             <p>".$row['product_name']."</p>
-                            <p><span>Price: </span>GHC".$row['price']."</p>
+                            <p><span>Giá: </span>".$row['price']."</p>
                         </a>
                     </li>";
                 endwhile;
             }else{
-                echo "<br clear = 'all'><center><h5 class = 'not_found'>Related Products appear here.....</h5></center>";
+                echo "<br clear = 'all'><center><h5 class = 'not_found'>Sản phẩm nổi bật sẽ hiển thị ở đây.....</h5></center>";
             }
             echo " </ul></div>
             ";
         }
 
+    }
+    function displayProductsByCategory($catId) {
+        require 'db_config.php';
+    
+        // Lấy sản phẩm của danh mục
+        $stmt = $con->prepare("SELECT * FROM products WHERE cat_id = :catId");
+        $stmt->bindParam(':catId', $catId, PDO::PARAM_INT);
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $stmt->execute();
+    
+        // Hiển thị sản phẩm
+        while ($row = $stmt->fetch()) {
+            echo "<li>
+                    <form method='POST' enctype='multipart/form-data'>
+                        <a href='pro_detail.php?&pro_id=".$row['pro_id']."'>
+                        <img src='./img/products_img/".$row['img1']."' alt='img'>
+                        <h4>".$row['product_name']."</h4>
+                        <h4 id='c_price'><small>".$row['price']."</small></h4>
+                        <center>
+                            <input type='hidden' value='".$row['pro_id']."' name='pro_id'>
+                            <button name='cart_btn' class='add-to-cart-btn' data-pro-id='".$row['pro_id']."'>Thêm giỏ hàng</button>
+                            <button class='p_btn' id='wish'><a href='#'>Yêu thích</a></button>
+                        </center>
+                        </a>
+                    </form>
+                  </li>";
+        }
+    }
+    
+    function displayAllCategories() {
+        require 'db_config.php';
+    
+        // Lấy tất cả các danh mục
+        $stmt = $con->prepare("SELECT * FROM main_cat");
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+        $stmt->execute();
+
+        while ($row = $stmt->fetch()) {
+            echo "<div id='bodyLeft' style='width:100%;'>
+                    <h2>".$row['category_name']."</h2>
+                    <ul>";
+            
+            displayProductsByCategory($row['cat_id']);
+            
+            echo "</ul><br clear='All'>
+                </div><!--End of body left-->";
+        }
     }
 
     function all_cat(){
@@ -316,48 +265,48 @@
         endwhile;
     }
 
-    function cat_products(){
-        require 'db_config.php';
-        if(isset($_GET['cat_id'])){
-            $cat_id = $_GET['cat_id'];
-            $stmt = $con->prepare("SELECT count(*) FROM products WHERE cat_id = $cat_id ");
-            $stmt->execute();
-            $count = $stmt->fetchColumn();
-            // Fetch category name
-            $maincat = $con->prepare("SELECT * FROM main_cat WHERE cat_id = $cat_id ");
-            $maincat ->setFetchMode(PDO:: FETCH_ASSOC);
-            $maincat ->execute();
-            $result  = $maincat->fetch();
-            echo"<h3>".$result['category_name']."</h3>";
-            // Check for product in category
-            if($count > 0){
-                $stmt = $con->prepare("SELECT * FROM products WHERE cat_id = $cat_id ");
-                $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-                $stmt->execute();
+    // function cat_products(){
+    //     require 'db_config.php';
+    //     if(isset($_GET['cat_id'])){
+    //         $cat_id = $_GET['cat_id'];
+    //         $stmt = $con->prepare("SELECT count(*) FROM products WHERE cat_id = $cat_id ");
+    //         $stmt->execute();
+    //         $count = $stmt->fetchColumn();
+    //         // Fetch category name
+    //         $maincat = $con->prepare("SELECT * FROM main_cat WHERE cat_id = $cat_id ");
+    //         $maincat ->setFetchMode(PDO:: FETCH_ASSOC);
+    //         $maincat ->execute();
+    //         $result  = $maincat->fetch();
+    //         echo"<h3>".$result['category_name']."</h3>";
+    //         // Check for product in category
+    //         if($count > 0){
+    //             $stmt = $con->prepare("SELECT * FROM products WHERE cat_id = $cat_id ");
+    //             $stmt->setFetchMode(PDO:: FETCH_ASSOC);
+    //             $stmt->execute();
 
-                while($row = $stmt->fetch()):
-                    echo "<li>
-                            <form method='POST' enctype='multipart/form-data'>
-                                <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                                <h4>".$row['product_name']."</h4>
-                                <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                                <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
-                                <center>
-                                    <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>View</a></button>
-                                    <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
-                                    <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Cart</button>
-                                    <button class = 'p_btn'id = 'wish'><a href = '#'>Wishlist</a></button>
-                                </center>
-                                </a>
-                            </form>
-                            </li>";
-                    echo "";
-                endwhile;
-            }else{
-                echo "<br clear = 'all'><center><h5 class = 'not_found'>No Products From This Category</h5></center>";
-            }
-        }
-    }
+    //             while($row = $stmt->fetch()):
+    //                 echo "<li>
+    //                         <form method='POST' enctype='multipart/form-data'>
+    //                             <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
+    //                             <h4>".$row['product_name']."</h4>
+    //                             <img src = './img/products_img/".$row['img1']."' alt = 'img'>
+    //                             <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
+    //                             <center>
+    //                                 <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>View</a></button>
+    //                                 <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
+    //                                 <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Cart</button>
+    //                                 <button class = 'p_btn'id = 'wish'><a href = '#'>Wishlist</a></button>
+    //                             </center>
+    //                             </a>
+    //                         </form>
+    //                         </li>";
+    //                 echo "";
+    //             endwhile;
+    //         }else{
+    //             echo "<br clear = 'all'><center><h5 class = 'not_found'>No Products From This Category</h5></center>";
+    //         }
+    //     }
+    // }
 
     function view_all_subcat(){
         require 'db_config.php';
@@ -366,61 +315,66 @@
             $stmt = $con->prepare("SELECT * FROM sub_cat where maincat_id = $cat_id");
             $stmt->setFetchMode(PDO:: FETCH_ASSOC);
             $stmt->execute();
-            echo "<h3>Sub Categories</h3>";
-            if($stmt->rowCount()>0){
-            while ($row = $stmt->fetch()):
-                $subcat = $row['subcat_id'];
-                $sub = $con->prepare("SELECT count(*) FROM products WHERE subcat_id = $subcat");
-                $sub->execute();
-                $count = $sub->fetchColumn();
-
-                echo 
-                " <li><a href = 'cat_products.php?subcat_id=".$row['subcat_id']."'>".$row['subcat_name']."(".$count.")</a></li>";
-            endwhile;
-            }else{
-                echo "<center><h5 class = 'not_found'>No Sub Categories available in stores</h5></center>";
-            }
-        }
-    }
-
-    function subcat_products(){
-        require 'db_config.php';
-        if(isset($_GET['subcat_id'])){
-            $subcat_id = $_GET['subcat_id'];
-            // Fetch category name
-            $maincat = $con->prepare("SELECT * FROM sub_cat WHERE subcat_id = $subcat_id ");
-            $maincat ->setFetchMode(PDO:: FETCH_ASSOC);
-            $maincat ->execute();
-            $result  = $maincat->fetch();
-            echo"<h3>".$result['subcat_name']."</h3>";
-            // Check for product in category
-                $stmt = $con->prepare("SELECT * FROM products WHERE subcat_id = $subcat_id ");
-                $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-                $stmt->execute();
-                if( $stmt->rowCount() > 0){
-                while($row = $stmt->fetch()):
+            echo "<h3>Danh mục mở rộng</h3>";
+            if($stmt->rowCount() > 0){
+                while ($row = $stmt->fetch()){
+                    $subcat = $row['subcat_id'];
+                    $sub = $con->prepare("SELECT count(*) FROM products WHERE subcat_id = $subcat");
+                    $sub->execute();
+                    $count = $sub->fetchColumn();
+    
                     echo "<li>
-                            <form method='POST' enctype='multipart/form-data'>
-                                <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                                <h4>".$row['product_name']."</h4>
-                                <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                                <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
-                                <center>
-                                    <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>View</a></button>
-                                    <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
-                                    <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Cart</button>
-                                    <button class = 'p_btn'id = 'wish'><a href = '#'>Wishlist</a></button>
-                                </center>
-                                </a>
-                            </form>
-                            </li>";
-                    echo "";
-                endwhile;
-            }else{
-                echo "<br clear = 'all'><center><h5 class = 'not_found'>No Products From This Sub Category</h5></center>";
+                            <a href='cat_products.php?subcat_id=".$row['subcat_id']."'>
+                                <img src = './img/subcat_img/".$row['subcat_img']."' alt='Subcategory Image' >
+                                ".$row['subcat_name']."(".$count.")
+                            </a>
+                          </li>";
+                }
+            } else {
+                echo "<center><h5 class='not_found'>Không có danh mục sản phẩm mở rộng nào</h5></center>";
             }
         }
     }
+    
+
+    // function subcat_products(){
+    //     require 'db_config.php';
+    //     if(isset($_GET['subcat_id'])){
+    //         $subcat_id = $_GET['subcat_id'];
+    //         // Fetch category name
+    //         $maincat = $con->prepare("SELECT * FROM sub_cat WHERE subcat_id = $subcat_id ");
+    //         $maincat ->setFetchMode(PDO:: FETCH_ASSOC);
+    //         $maincat ->execute();
+    //         $result  = $maincat->fetch();
+    //         echo"<h3>".$result['subcat_name']."</h3>";
+    //         // Check for product in category
+    //             $stmt = $con->prepare("SELECT * FROM products WHERE subcat_id = $subcat_id ");
+    //             $stmt->setFetchMode(PDO:: FETCH_ASSOC);
+    //             $stmt->execute();
+    //             if( $stmt->rowCount() > 0){
+    //             while($row = $stmt->fetch()):
+    //                 echo "<li>
+    //                         <form method='POST' enctype='multipart/form-data'>
+    //                             <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
+    //                             <h4>".$row['product_name']."</h4>
+    //                             <img src = './img/products_img/".$row['img1']."' alt = 'img'>
+    //                             <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
+    //                             <center>
+    //                                 <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>View</a></button>
+    //                                 <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
+    //                                 <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Cart</button>
+    //                                 <button class = 'p_btn'id = 'wish'><a href = '#'>Wishlist</a></button>
+    //                             </center>
+    //                             </a>
+    //                         </form>
+    //                         </li>";
+    //                 echo "";
+    //             endwhile;
+    //         }else{
+    //             echo "<br clear = 'all'><center><h5 class = 'not_found'>No Products From This Sub Category</h5></center>";
+    //         }
+    //     }
+    // }
 
     function view_all_cat(){
         require 'db_config.php';
@@ -429,7 +383,7 @@
             $stmt = $con->prepare("SELECT * FROM main_cat");
             $stmt->setFetchMode(PDO:: FETCH_ASSOC);
             $stmt->execute();
-            echo "<h3> Categories</h3>";
+            echo "<h3>Sản phẩm</h3>";
             if($stmt->rowCount() > 0){
             while ($row = $stmt->fetch()):
                 $cat = $row['cat_id'];
@@ -440,106 +394,10 @@
                 echo" <li><a href = 'cat_products.php?cat_id=".$row['cat_id']."'>".$row['category_name']."(".$count.")</a></li>";
             endwhile;
             }else{
-                echo "<center><h5 class = 'not_found'>No Categories available in stores</h5></center>";
+                echo "<center><h5 class = 'not_found'>Không có danh mục sản phẩm nào</h5></center>";
             }
         }
     }
-
-    function kids(){
-        require 'db_config.php';
-        if(isset($_GET['kids'])){
-            $stmt = $con->prepare("SELECT * FROM products where for_whom = 'kids'");
-            $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-            $stmt->execute();
-            echo "<h3>Products Related to KIDS</h3>";
-            if($stmt->rowCount() > 0){
-                while($row = $stmt->fetch()):
-                echo "<li>
-                        <form method='POST' enctype='multipart/form-data'>
-                            <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                            <h4>".$row['product_name']."</h4>
-                            <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                            <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
-                            <center>
-                                <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>View</a></button>
-                                <input type = 'hidden' value = '".$row['pro_id']."' name = 'pro_id '>
-                                <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Cart</button>
-                                <button class = 'p_btn'id = 'wish'><a href = '#'>Wishlist</a></button>
-                            </center>
-                            </a>
-                        </form>
-                        </li>";
-                echo "";
-                endwhile;
-            }else{
-                echo "<br clear = 'all'><center><h5 class = 'not_found'>No Products Related to Kids in Store</h5></center>";
-            }
-        }
-    }
-    function women(){
-        require 'db_config.php';
-        if(isset($_GET['women'])){
-            $stmt = $con->prepare("SELECT * FROM products where for_whom = 'women'");
-            $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-            $stmt->execute();
-            echo "<h3>Products Related to WOMEN</h3>";
-            if($stmt->rowCount() > 0){
-            while($row = $stmt->fetch()):
-                echo "<li>
-                        <form method='POST' enctype='multipart/form-data'>
-                            <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                            <h4>".$row['product_name']."</h4>
-                            <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                            <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
-                            <center>
-                                <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>View</a></button>
-                                <input type = 'hidden' value = '".$row['pro_id']."' name = 'pro_id '>
-                                <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Cart</button>
-                                <button class = 'p_btn'id = 'wish'><a href = '#'>Wishlist</a></button>
-                            </center>
-                            </a>
-                        </form>
-                        </li>";
-                echo "";
-            endwhile;
-            }else{
-                echo "<br clear = 'all'><center><h5 class = 'not_found'>No Products Related to Women in Store</h5></center>";
-            }
-        }
-    }
-    function men(){
-        require 'db_config.php';
-        if(isset($_GET['men'])){
-            $stmt = $con->prepare("SELECT * FROM products where for_whom = 'men'");
-            $stmt->setFetchMode(PDO:: FETCH_ASSOC);
-            $stmt->execute();
-            echo "<h3>Products Related to MEN</h3>";
-            if($stmt->rowCount() > 0){
-                while($row = $stmt->fetch()):
-                    echo "<li>
-                            <form method='POST' enctype='multipart/form-data'>
-                                <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                                <h4>".$row['product_name']."</h4>
-                                <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                                <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
-                                <center>
-                                    <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>View</a></button>
-                                    <input type = 'hidden' value = '".$row['pro_id']."' name = 'pro_id '>
-                                    <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Cart</button>
-                                    <button class = 'p_btn'id = 'wish'><a href = '#'>Wishlist</a></button>
-                                </center>
-                                </a>
-                            </form>
-                            </li>";
-                    echo "";
-                endwhile;
-            }else{
-                echo "<br clear = 'all'><center><h5 class = 'not_found'>No Products Related to Women in Store</h5></center>";
-            }
-        }
-    }
-
-
     function search(){
         require 'db_config.php';
         if(isset($_GET['btn_search'])){
@@ -548,21 +406,20 @@
             $stmt = $con->prepare("SELECT * FROM products where keyword like '%$search_item%' or product_name like '%$search_item%'");
             $stmt->setFetchMode(PDO:: FETCH_ASSOC);
             $stmt->execute();
-            echo "<div id = 'bodyLeft'> <ul>
-            <h3>Search Results for <i><small>'".$search_item."'</small></i></h3>";
+            echo "<div id = 'bodyRight'> <ul>
+            <h3>Kết quả tìm kiếm của <i><small>'".$search_item."'</small></i></h3>";
             if($stmt->rowCount() > 0){
             while($row = $stmt->fetch()):
                 echo "<li>
                         <form method='POST' enctype='multipart/form-data'>
                             <a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>
-                            <h4>".$row['product_name']."</h4>
                             <img src = './img/products_img/".$row['img1']."' alt = 'img'>
-                            <h4 id = 'c_price'><small>GHC".$row['price']."</small></h4>
+                            <h4>".$row['product_name']."</h4>
+                            <h4 id = 'c_price'><small>".$row['price']."</small></h4>
                             <center>
-                                <button class = 'p_btn' id = 'view'><a href = 'pro_detail.php?&pro_id=".$row['pro_id']."'>View</a></button>
                                 <input type = 'hidden' value = '".$row['pro_id']."' name='pro_id'>
-                                <button name = 'cart_btn' class = 'p_btn'id = 'cart'>Cart</button>
-                                <button class = 'p_btn'id = 'wish'><a href = '#'>Wishlist</a></button>
+                                <button name = 'cart_btn' class = 'add-to-cart-btn'id = 'cart'>Thêm giỏ hàng</button>
+                                <button class = 'p_btn'id = 'wish'><a href = '#'>Yêu thích</a></button>
                             </center>
                             </a>
                         </form>
@@ -570,7 +427,7 @@
                 echo "";
             endwhile;
             }else{
-                echo "<center><h5 class = 'not_found'>No product found <a href = 'index.php'>  Back to Products</a></h5></center>";
+                echo "<center><h5 class = 'not_found'>Không tìm thấy sản phẩm <a href = 'index.php'> Quay lại trang chủ</a></h5></center>";
             }
             echo "</ul></div>";
         }
@@ -587,36 +444,60 @@
         }
         return $ip;
     }
-
-    function add_cart(){
+    function add_cart($user_id) {
         require 'db_config.php';
-        if(isset($_POST['cart_btn'])){
+    
+        if (isset($_POST['cart_btn'])) {
             $pro_id = $_POST['pro_id'];
             $ip = getIp();
-            // check for pro in cart
-            $stmt = $con->prepare("SELECT * FROM cart where pro_id = $pro_id AND ip_address = '$ip'");
-            $stmt->setFetchMode(PDO:: FETCH_ASSOC);
+    
+            // Kiểm tra sự tồn tại của sản phẩm trong giỏ hàng
+            $stmt = $con->prepare("SELECT * FROM cart WHERE pro_id = :pro_id AND user_id = :user_id");
+            $stmt->bindParam(':pro_id', $pro_id, PDO::PARAM_INT);
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->setFetchMode(PDO::FETCH_ASSOC);
             $stmt->execute();
-            if(!$stmt->rowCount() > 0){
-                $stmt = $con->prepare( "INSERT INTO cart (pro_id, qty, ip_address) values('$pro_id', 1, '$ip')" );
-                if($stmt->execute()){  
-                    echo "<script>window.open('index.php', '_self')</script>";
-                }else{
-                    echo "<script>alert('Sorry try again')</script>";
+    
+            if (!$stmt->rowCount() > 0) {
+                // Sản phẩm chưa tồn tại trong giỏ hàng, thêm mới vào giỏ hàng
+                $stmt = $con->prepare("INSERT INTO cart (pro_id, qty, ip_address, user_id) VALUES (:pro_id, 1, :ip, :user_id)");
+                $stmt->bindParam(':pro_id', $pro_id, PDO::PARAM_INT);
+                $stmt->bindParam(':ip', $ip);
+                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    
+                if ($stmt->execute()) {
+                    // Trả về một JSON để xử lý ở phía client (trình duyệt)
+                    echo json_encode(array('status' => 'success'));
+                    exit;
+                } else {
+                    echo json_encode(array('status' => 'error'));
+                    exit;
                 }
-            }else{
-                echo "<script>alert('Product already in cart')</script>";
+            } else {
+                $updateStmt = $con->prepare("UPDATE cart SET qty = qty + 1 WHERE pro_id = :pro_id AND user_id = :user_id");
+                $updateStmt->bindParam(':pro_id', $pro_id, PDO::PARAM_INT);
+                $updateStmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    
+                if ($updateStmt->execute()) {
+                    echo json_encode(array('status' => 'success'));
+                    exit;
+                } else {
+                    echo json_encode(array('status' => 'error'));
+                    exit;
+                }
             }
         }
     }
-    function cart_count(){
+    
+    function cart_count($user_id){
         require 'db_config.php';
-        $ip = getIp();
-        $stmt = $con->prepare("SELECT * FROM cart WHERE ip_address = '$ip'");
+        $stmt = $con->prepare("SELECT * FROM cart WHERE user_id = :user_id");
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
         $stmt->execute();
         $count_cart = $stmt->rowCount();
         echo $count_cart;
     }
+    
     function qty_increase(){
         if(isset($_GET['increase_qty'])){
             require 'db_config.php';
@@ -649,22 +530,23 @@
             }
         }
     }
-    function cart_details(){
+    function cart_details($user_id){
         require 'db_config.php';
         $ip = getIp();
-        $stmt = $con->prepare("SELECT * FROM cart WHERE ip_address = '$ip'");
-        $stmt->setFetchMode(PDO:: FETCH_ASSOC);
+        $stmt = $con->prepare("SELECT * FROM cart WHERE user_id = :user_id");
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute();
         if($stmt->rowCount() > 0){
             echo "
             <tr>
-            <th>Image</th>
-            <th>Product Name</th>
-            <th>Quantity</th>
-            <th>Price(GHC)</th>
-            <th>Sub Total(GHC)</th>
-            <th>Status</th>
-            <th>Remove</th>
+            <th>Ảnh</th>
+            <th>Tên sản phẩm</th>
+            <th>Số lượng</th>
+            <th>Giá (VND)</th>
+            <th>Tổng cộng (VND)</th>
+            <th>Trạng thái</th>
+            <th>Xóa</th>
             </tr>
             ";
             $net_total = 0;
@@ -682,24 +564,24 @@
                     ".$row['qty']."
                     <a id = 'add' href = 'cart.php?increase_qty&cart_id=".$row['cart_id']."'>+</a>
                     </td>
-                    <td>".$cart_pro['price']."</td>
-                    <td>".$cart_pro['price'] * $row['qty']."</td>
-                    <td>Processing</td>
+                    <td>".$cart_pro['price']." VNĐ</td>
+                    <td>".$cart_pro['price'] * $row['qty']." VNĐ</td>
+                    <td>Đang xử lý</td>
                     <td><a id = 'remove' href = 'cart.php?remove&cart_id=".$row['cart_id']."'>&times</a></td>
                 </tr>";
                 $net_total = $net_total + ($cart_pro['price'] * $row['qty']);
             endwhile;
             echo "<tr>
-                    <td><button id = 'shopping'><a href = 'index.php'>Continue Shopping</a></button></td>
+                    <td><button id = 'shopping'><a href = 'index.php'>Quay lại mua</a></button></td>
                     <td><button id = 'checkOut'>Check Out</button></td>
                     <td></td>
                     <td></td>
-                    <td><b><span>Net Total: </span>GHC$net_total</b></td>
+                    <td><b><span>Tổng tiền hàng: </span>$net_total VND</b></td>
                     <td></td>
                     <td></td>
                 </tr>";
         }else{
-            echo "<center><h5 class = 'not_found'>No Product in your cart now.<a href = 'index.php'> <br>Continue Shopping</a></h5></center>";
+            echo "<center><h5 class = 'not_found'>Không có sản phẩm trong giỏ hàng.<a href = 'index.php'> <br>Quay lại mua</a></h5></center>";
         }
         qty_decrease();
         qty_increase();

@@ -12,8 +12,7 @@ body{
 .header{
     margin: 0;
     padding: 0;
-    background: #400040;
-    /* background: #ff4000; */
+    background: #eeeeee;
     height: 110px;
     width: 100%;
 }
@@ -25,88 +24,11 @@ body{
 #logo img{
     width: 60%;
     /* height: 110px; */
-    margin-top: 1rem;
+    margin-top: -2rem;
     margin-left: 2rem;
 }
-#links{
-    overflow: hidden;
-    width: 80%;
-    height: 50px;
-    float: left;
-}
-#links ul{
-    list-style-type: none;
-    margin-right: 30px;
-}
-#links ul li{
-    padding: 0 1%;
-    float: right;
-    margin-left: 30px;
-    line-height: 30px;
-}
-#links ul li:hover{
-    background:#0a0442 ;
-    border-top: 3px solid #fff;
-}
-#links ul li a{
-    color: #fff;
-    text-decoration: none;
-    font-size: 14px;
-    cursor: pointer;
-}
-/* sign Up form */
-#links ul li form{
-    display: none;
-    position: absolute;
-    background: #0a0442 ;
-    margin-left: -35.5%;
-    padding: 1%;
-    box-sizing: border-box;
-    width: 40%;
-    border-radius: 5px;
-    border: 1px solid #800080;
-    /* box-shadow: 2px 2px 2px grey; */
-}
-#links ul li form table{
-    width: 100%;
-}
-#links ul li form table tr td{
-    height: 35px;
-    color: #fff;
-    width: 48%;
-    padding: 10px;
-}
-#links ul li form table tr td input{
-    border-radius: 3px;
-    padding-left: 2%;
-    outline: none;
-    border: 1px solid #800080;
-    width: 100%;
-    height: 30px;
-}
-#links ul li:hover form{
-    display: block;
-}
-#links ul li form input[type = submit]{
-    height:35px;
-    outline: none;
-    border: 1px solid #800080;
-    width: 48%;
-    background: #400040;
-    color: #fff;
-    margin-top: 20px;
-    border-radius: 3px;
-}
-#links ul li form input[type = submit]:hover{
-    color: #800080;
-    background: #fff;
-    cursor: pointer;
-}
-#links ul li form h3{
-    color: #fff;
-    padding: 2%;
-    text-transform: uppercase;
-    text-decoration: underline;
+#links {
+    
 }
 form #text{
     width: 30% !important;
@@ -267,8 +189,8 @@ form #logText{
 }
 .cart form table tr td img{
     padding-top: 3%;
-    width: 50px;
-    height: 45px;
+    width: 93px;
+    height: 87px;
 }
 .cart form table tr td #sub, #add{
     font-size: 0.8;
@@ -360,19 +282,19 @@ form #logText{
     transition: .5;
 }
 
-/* body left */
-#bodyLeft{
-    width: 72%;
+/* body right */
+#bodyRight{
+    width: 80%;
     margin: 1%;
     background: #fff;
-    float: left;
+    float: right;
     border-radius: 3px;
     padding: 1%;
     box-sizing: border-box;
     overflow-y: auto;
-    height: 500px;
+    height: auto;
 }
-#bodyLeft h2{
+#bodyRight h2{
     font-size: 2vh;
     padding-left: 20px;
     background: #400040;
@@ -384,13 +306,13 @@ form #logText{
     border-top-right-radius: 3px;
     text-shadow: 5px 5px 5px #000;
 }
-#bodyLeft .not_found{
+#bodyRight .not_found{
     margin-top: 10%;
     color: grey;
     height: 45px;
     line-height: 45px;
 }
-#bodyLeft h3{
+#bodyRight h3{
     background: #400040;
     padding-left: 5%;
     color: #fff;
@@ -404,11 +326,11 @@ form #logText{
     text-shadow: 5px 5px 5px #000;
     box-shadow: 3px 3px 3px #000;
 }
-#bodyLeft ul{
+#bodyRight ul{
     list-style-type: none;
 }
-#bodyLeft ul li{
-    width: 31%;
+#bodyRight ul li{
+    width: 21%;
     min-height: 365px;
     border: 1px solid #ccc;
     float: left;
@@ -416,12 +338,12 @@ form #logText{
     margin-left: 1.5%;
     margin-top: 10px;
 }
-#bodyLeft ul li a{
+#bodyRight ul li a{
     text-decoration: none;
     color: #2e2e2e;
     display: block;
 }
-#bodyLeft ul li a h4{
+#bodyRight ul li a h4{
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -429,7 +351,7 @@ form #logText{
     font-size: 14px;
     margin-top: 5px;
 }
-#bodyLeft ul li a #c_price{
+#bodyRight ul li a #c_price{
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -440,22 +362,22 @@ form #logText{
     margin: 1% !important;
     color: #400040 !important;
 }
-#bodyLeft ul li a  img{
+#bodyRight ul li a img{
     width: 100%;
-    height: 270px;
+    height: 200px;
     margin-bottom: 10px;
 }
-#bodyLeft ul li a center button{
+#bodyRight ul li a center button{
     width: 30%;
     height: 30px;
     background: #fff;
     border-radius: 3px;
     border: 1px solid #400040;
 }
-#bodyLeft ul li a center button:hover{
+#bodyRight ul li a center button:hover{
     background: #400040;
 }
-#bodyLeft ul li a center button:hover a{
+#bodyRight ul li a center button:hover a{
     color: #fff;
 }
 .not_found{
@@ -467,49 +389,54 @@ form #logText{
 }
 
 /* product buttons */
-#bodyLeft .p_btn{
+#bodyRight .p_btn{
     width: 30%;
     height: 30px;
     border-radius: 4px;
     border: none;
+    margin-top: 5px;
 }
-#bodyLeft #view{
-    background: #0f0;
-}
-#bodyLeft #cart{
+#bodyRight #cart{
+    width: 40%;
+    margin-left: 8%;
+    float: left;
     background: #f00;
     color: #fff !important;
 }
-#bodyLeft #wish{
+#bodyRight #wish{
+    width: 40%;
+    margin-right: 8%;
+    float: right;
     background: #fff;
     border: 2px solid #400040;
 }
-#bodyLeft #wish a{
+#bodyRight #wish a{
     color: #400040 !important;
 }
-#bodyLeft #wish:hover a{
+#bodyRight #wish:hover a{
     color: #fff !important;
 }
-#bodyLeft .p_btn:hover{
+#bodyRight .p_btn:hover{
     background: #400040 !important;
 }
-#bodyLeft .p_btn:hover a{
+#bodyRight .p_btn:hover a{
     color: #fff !important;
 }
-#bodyLeft .p_btn a{
+#bodyRight .p_btn a{
     color: #fff !important;
     font-weight: bold !important;
 }
-/* End of body left */
+/* End of body right */
 /* 
 
     --------------------------
-    Body right
+    Body left
     -------------------------
 */
 
-#bodyRight1 h3{
-    background: #400040;
+#bodyLeft h3{
+    font-size: 14px;
+    background: #0a0040;
     height: 40px;
     line-height: 40px;
     text-align: center;
@@ -517,39 +444,39 @@ form #logText{
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
 }
-#bodyRight1{
-    width: 25%;
+#bodyLeft{
+    width: 17%;
     margin: 1% 1% 1% 0%;
     background: #fff;
     float: left;
     border-radius: 3px;
-    height: 500px;
+    height: 400px;
 }
-.bodyRight1 ul{
+.bodyLeft ul{
     list-style-type: none;
 }
-.bodyRight1 ul li{
+.bodyLeft ul li{
     height: 35px;
     line-height: 35px;
     width: 100%;
     padding-left: 5%;
 }
 
-.bodyRight1 ul li a{
+.bodyLeft ul li a{
     text-decoration: none;
     color: #2e2e2e;
     font-size: 14px;
     font-weight: bold;
 }
-.bodyRight1 ul li a:hover{
+.bodyLeft ul li a:hover{
     text-decoration: underline;
     color: #000;
 }
-.bodyRight1{
+.bodyLeft{
     padding-top: 1.3%;
     margin-right: -2 !important;
 }
-.bodyRight1 h3{
+.bodyLeft h3{
     margin-top: 2%;
     background: grey !important;
 }

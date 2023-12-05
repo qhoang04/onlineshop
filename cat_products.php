@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bentil'sZone || Online Mall</title>
+    <title>onlineshop</title>
     <link rel="stylesheet" href="./css/index.css">
     <link rel="stylesheet" href="./css/pe.css">
         <!-- online css -->
@@ -16,16 +16,14 @@
 <body>
     
     <?php
+        session_start();
         include './inc/function.php'; 
         include './inc/header.php'; 
         include './inc/navbar.php'; 
         // BOdy Left content
         echo "<div id  = 'bodyLeft'><ul>";
-        cat_products();
-        subcat_products(); 
-        men();
-        women();
-        kids();
+        // cat_products();
+        // subcat_products(); 
         echo"</ul></div>"; 
         // body Right content
     if(isset($_GET['cat_id']) || isset($_GET['subcat_id'])){
@@ -38,7 +36,9 @@
     }
 
         include './inc/footer.php';
-        echo  add_cart();
+        if (isset($_SESSION['user_id'])) {
+            add_cart($_SESSION['user_id']);
+        }
     ?>
 
 

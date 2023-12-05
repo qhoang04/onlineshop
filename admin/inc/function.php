@@ -59,6 +59,7 @@
         <td>".$row['subcat_name']."</td>
         <td style = 'min-width:200px'><a href = 'index.php?edit_subcat&&subcategory_id=".$row['subcat_id']."'  id = 'edi'>Sửa</a></td>
         <td style = 'min-width:200px'><a href = 'index.php?delete_subcat&&subcategory_id=".$row['subcat_id']."' id = 'del'>Xóa</a></td>
+        <td style='width: 150px;'><img src=\"../img/products_img/".$row['subcat_img']."\" width='150' height='150'></td>
         </tr>";
         endwhile;
     }
@@ -69,17 +70,17 @@
             $cat_name = $_POST['cat_name'];
             if(empty($cat_name)){
                 $error = true;
-                echo "<script>alert('Cart Name cannot be empty!')</script>";
+                echo "<script>alert('Không được để trống tên danh mục sản phẩm!')</script>";
             }
             if(!$error){
                 $stmt = $con->prepare("INSERT INTO main_cat(category_name) values(:category_name)");
                 $stmt->bindParam(':category_name', $cat_name);
                 $inserted = $stmt->execute();
                 if($inserted){
-                    echo "<script>alert(' Category Added Successfully!')</script>";
+                    echo "<script>alert('Thêm danh mục sản phẩm thành công!')</script>";
                     echo "<script>window.open('index.php?add_category', '_self')</script>";
                 }else{
-                    echo "<script>alert('Category Addition Failed. Try again!')</script>";
+                    echo "<script>alert('Thêm danh mục sản phẩm thất bại. Thử lại!')</script>";
                 }
             }
         }
@@ -91,30 +92,42 @@
         $error = false;
         if(isset($_POST['add_subcat'])){
             $subcat_name = $_POST['cat_name'];
+            // $imgsc = $_FILES['imgsc']['name'];
+            // $imgsc_temp = $_FILES['imgsc']['tmp_name'];
+            // move_uploaded_file($imgsc_temp, "../img/products_img/$imgsc");
             if(empty($subcat_name)){
                 $error = true;
-                echo "<script>alert('Sub Category Name cannot be empty!')</script>";
+                echo "<script>alert('Không được để trống danh mục mở rộng!')</script>";
                 exit;
             }
             if(isset($_POST['main_cat'])){
                 $main_cat= $_POST['main_cat'];
             }else{
                 $error = true;
-                echo "<script>alert('Select Main Category')</script>";
+                echo "<script>alert('Chọn danh mục cha')</script>";
                 exit;
             }
+
             if(!$error){
-                $stmt = $con->prepare("INSERT INTO sub_cat(subcat_name, maincat_id) values(:subcat_name, :main_cat)");
+                $imgsc = $_FILES['imgsc']['name'];  // Lấy tên file
+                $imgsc_temp = $_FILES['imgsc']['tmp_name'];  // Lấy đường dẫn tạm thời của file
+                move_uploaded_file($imgsc_temp, "../img/products_img/$imgsc");  // Di chuyển file vào đúng thư mục
+                
+                $stmt = $con->prepare("INSERT INTO sub_cat(subcat_name, maincat_id, subcat_img) VALUES (:subcat_name, :main_cat, :imgsc)");
                 $stmt->bindParam(':subcat_name', $subcat_name);
                 $stmt->bindParam(':main_cat', $main_cat);
+                $stmt->bindParam(':imgsc', $imgsc);
+                
                 $inserted = $stmt->execute();
+                
                 if($inserted){
-                    echo "<script>alert('Sub Category inserted successfully')</script>";
+                    echo "<script>alert('Thêm danh mục mở rộng thành công')</script>";
                     echo "<script>window.open('index.php?add_subcat', '_self')</script>";
-                }else{
-                    echo "<script>alert(' Failed to add Sub Category ')</script>";
+                } else {
+                    echo "<script>alert(' Thêm danh mục mở rộng thất bại')</script>";
                 }
             }
+            
         }
     }
 
@@ -146,14 +159,14 @@
                 $cat_id= $_POST['main_cat'];
             }else{
                 $error = true;
-                echo "<script>alert('Select Product\'s Category');</script>";
+                echo "<script>alert('Chọn sản phẩm\' Danh mục');</script>";
                 exit;
             }
             if(isset($_POST['sub_cat'])){
                 $subcat_id= $_POST['sub_cat'];
             }else{
                 $error = true;
-                echo "<script>alert('Select Product\'s Sub Category');</script>";
+                echo "<script>alert('Chọn sản phẩm\' Danh mục mở rộng');</script>";
                 exit;
             }
             $feature1 = $_POST['feature1'];
@@ -162,7 +175,6 @@
             $feature4 = $_POST['feature4'];
             $price = $_POST['price'];
             $waranty = $_POST['warranty'];
-            $for_whom = $_POST['for_whom'];
             $key = $_POST['key'];
             $model_no = $_POST['model'];
 
@@ -187,14 +199,14 @@
             if(!$error){
                 $today = date('y-m-d h:i:s');
                 $stmt = $con->prepare(
-                    "INSERT INTO products(product_name, cat_id, subcat_id, img1, img2, img3, img4, feature1,feature2, feature3, feature4, price, pro_model, warranty, for_whom, keyword, date_added) 
-                    values('$product_name', ' $cat_id', '$subcat_id', '$img1', '$img2', '$img3', ' $img4', '$feature1', '$feature2', '$feature3', '$feature4', '$price', ' $model_no', ' $waranty','$for_whom', ' $key', '$today')"
+                    "INSERT INTO products(product_name, cat_id, subcat_id, img1, img2, img3, img4, feature1,feature2, feature3, feature4, price, pro_model, warranty, keyword, date_added) 
+                    values('$product_name', ' $cat_id', '$subcat_id', '$img1', '$img2', '$img3', ' $img4', '$feature1', '$feature2', '$feature3', '$feature4', '$price', ' $model_no', ' $waranty', '$key', '$today')"
                 );
                 if($stmt->execute()){
-                    echo "<script>alert('Product has been added successfully');</script>";
+                    echo "<script>alert('Sản phẩm đã được thêm thành công');</script>";
                     echo "<script>window.open('index.php?add_product', '_self')</script>";
                 }else{
-                    echo "<script>alert('Product addition addition failed');</script>";
+                    echo "<script>alert('Thêm sản phẩm thất bại');</script>";
                 }
             }
         }
@@ -209,15 +221,15 @@
             $stmt->execute();
             if($row = $stmt->fetch()){
                 
-                echo "    <form  method=\"POST\" autocomplete = \"off\" enctype=\"multipart/form-data\">
+                echo "<form  method=\"POST\" autocomplete = \"off\" enctype=\"multipart/form-data\">
                 <table>
                     <tr>
-                        <td>Update Cartegory Name: </td>
-                        <td><input type=\"text\" name = \"cat_name\" Placeholder = \"Enter Category name\" value ='". $row['category_name']."'></td>
+                        <td>Cập nhật tên danh mục: </td>
+                        <td><input type=\"text\" name = \"cat_name\" Placeholder = \"Nhập tên danh mục\" value ='". $row['category_name']."'></td>
                     </tr>
                 </table>
                 <center>
-                    <button type = \"submit\" name = \"update_cat\">Update Category</button>
+                    <button type = \"submit\" name = \"update_cat\">Cập nhật</button>
                 </center>
             </form>";
              
@@ -227,7 +239,7 @@
                 $stmt = $con->prepare("UPDATE main_cat SET category_name = :updated_name where cat_id = $cat_id");
                 $stmt->bindParam(':updated_name', $new_cat_name);
                 if( $stmt->execute()){
-                    echo "<script>alert('Category updated Successfuly!')</script>";
+                    echo "<script>alert('Cập nhật thành công')</script>";
                     echo "<script>window.open('index.php?add_category', '_self')</script>";
                 }
             }
@@ -236,60 +248,85 @@
 
     function edit_subcat(){
         require './inc/db_config.php';
+    
         if(isset($_GET['edit_subcat'])){
             $subcat_id = $_GET['subcategory_id'];
             $stmt = $con->prepare("SELECT * FROM sub_cat WHERE subcat_id = $subcat_id");
             $stmt->setFetchMode(PDO:: FETCH_ASSOC);
             $stmt->execute();
+    
             if($row = $stmt->fetch()){
                 $cat = $row['maincat_id'];
                 $stmt = $con->prepare("SELECT * FROM main_cat WHERE cat_id = $cat");
                 $stmt->setFetchMode(PDO:: FETCH_ASSOC);
                 $stmt->execute();
                 $fetch = $stmt->fetch();
-                echo "<form  method=\"POST\" autocomplete = \"off\">
-                <table>
-                    <tr>
-                        <td>Update Category: </td>
-                        <td>
-                            <select name=\"main_cat\">
-                                <option value = '".$fetch['cat_id']."'selected>".$fetch['category_name']."</option>";
-                                fetch_cat();
-                            echo "</select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Update Sub Cartegory Name: </td>
-                        <td><input type=\"text\" name = \"subcat_name\" Placeholder = \"Enter sub category name\" value ='". $row['subcat_name']."'></td>
-                    </tr>
-                </table>
-                <center>
-                    <button type = \"submit\" name = \"update_subcat\">Update sub category</button>
-                </center>
-            </form>";
-             
-            }
-            if(isset($_POST['update_subcat'])){
-                if(isset($_POST['main_cat'])){
-                    $new_cat_id = $_POST['main_cat'];
-                }else{
-                    echo "<script>alert('Select Category!')</script>";
-                    exit;
-                }
-                
-                $new_subcat_name = $_POST['subcat_name'];
-                $stmt = $con->prepare("UPDATE sub_cat SET maincat_id = :updated_maincat, subcat_name = :updated_subcat  where subcat_id = $subcat_id");
-                $stmt->bindParam(':updated_maincat', $new_cat_id);
-                $stmt->bindParam(':updated_subcat', $new_subcat_name);
-                if( $stmt->execute()){
-                    echo "<script>alert('Sub Category updated Successfuly!')</script>";
-                    echo "<script>window.open('index.php?add_subcat', '_self')</script>";
-                }else{
-                    "<script>alert('Sub Category update failed!')</script>";
+    
+                echo "<form method=\"POST\" enctype=\"multipart/form-data\">
+                    <table>
+                        <tr>
+                            <td>Cập nhật danh mục: </td>
+                            <td>
+                                <select name=\"main_cat\">
+                                    <option value='".$fetch['cat_id']."' selected>".$fetch['category_name']."</option>";
+                                    fetch_cat();
+                                echo "</select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Cập nhật tên danh mục mở rộng: </td>
+                            <td><input type=\"text\" name=\"subcat_name\" placeholder=\"Nhập tên danh mục mở rộng\" value ='". $row['subcat_name']."'></td>
+                        </tr>
+                        <tr>
+                            <td>Ảnh danh mục mở rộng hiện tại: </td>
+                            <td><img src=\"../img/products_img/".$row['subcat_img']."\" style='max-width: 50px; max-height: 50px;'></td>
+                        </tr>
+                        <tr>
+                            <td>Cập nhật ảnh danh mục mở rộng: </td>
+                            <td><input type='file' name='imgsc'></td>
+                        </tr>
+                    </table>
+                    <center>
+                        <button type=\"submit\" name=\"update_subcat\">Cập nhật</button>
+                    </center>
+                </form>";
+    
+                if(isset($_POST['update_subcat'])){
+                    if(isset($_POST['main_cat'])){
+                        $new_cat_id = $_POST['main_cat'];
+                    } else {
+                        echo "<script>alert('Chọn danh mục!')</script>";
+                        exit;
+                    }
+    
+                    $new_subcat_name = $_POST['subcat_name'];
+    
+                    // Kiểm tra nếu có file ảnh mới được chọn
+                    if (isset($_FILES['imgsc']) && $_FILES['imgsc']['error'] == UPLOAD_ERR_OK) {
+                        $imgsc_temp = $_FILES['imgsc']['tmp_name'];
+                        $imgsc_name = $_FILES['imgsc']['name'];
+                        move_uploaded_file($imgsc_temp, "../img/products_img/$imgsc_name");
+                    } else {
+                        // Nếu không có ảnh mới, sử dụng ảnh hiện tại
+                        $imgsc_name = $row['subcat_img'];
+                    }
+    
+                    $stmt = $con->prepare("UPDATE sub_cat SET maincat_id = :updated_maincat, subcat_name = :updated_subcat, subcat_img = :updated_imgsc WHERE subcat_id = $subcat_id");
+                    $stmt->bindParam(':updated_maincat', $new_cat_id);
+                    $stmt->bindParam(':updated_subcat', $new_subcat_name);
+                    $stmt->bindParam(':updated_imgsc', $imgsc_name);
+    
+                    if($stmt->execute()){
+                        echo "<script>alert('Cập nhật danh mục mở rộng thành công!')</script>";
+                        echo "<script>window.open('index.php?add_subcat', '_self')</script>";
+                    } else {
+                        echo "<script>alert('Cập nhật danh mục mở rộng thất bại!')</script>";
+                    }
                 }
             }
         }
     }
+    
 
     function edit_product(){
         require './inc/db_config.php';
@@ -305,11 +342,11 @@
         
                 <table>
                     <tr>
-                        <td>Enter Product Name: </td>
-                        <td><input type='text' name = 'pro_name' value = '".$row['product_name']."' Placeholder = 'Enter product name'></td>
+                        <td>Tên sản phẩm: </td>
+                        <td><input type='text' name = 'pro_name' value = '".$row['product_name']."' Placeholder = 'Nhập tên sản phẩm'></td>
                     </tr>
                     <tr>
-                        <td>Select Category: </td>
+                        <td>Chọn danh mục: </td>
                         <td>
                             <select name='main_cat' id=''>";
                             $maincat_id = $row['cat_id'];
@@ -323,7 +360,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Select Sub Category: </td>
+                        <td>Chọn danh mục mở rộng: </td>
                         <td>
                             <select name='sub_cat' id=''>";
                             $subcat_id = $row['subcat_id'];
@@ -337,80 +374,68 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Select Product Image 1: </td>
+                        <td>Ảnh sản phẩm 1: </td>
                         <td>
                         <input type='file' name = 'img1'>
                         <img src = '../img/products_img/".$row['img1']."' width = '35px'>
                         </td>
                     </tr>
                     <tr>
-                        <td>Select Product Image 2: </td>
+                        <td>Ảnh sản phẩm 2: </td>
                         <td>
                         <input type='file' name = 'img2'>
                         <img src = '../img/products_img/".$row['img2']."' width = '35px'>
                         </td>
                     </tr>
                     <tr>
-                        <td>Select Product Image 3: </td>
+                        <td>Ảnh sản phẩm 3: </td>
                         <td>
                         <input type='file' name = 'img3'>
                         <img src = '../img/products_img/".$row['img3']."' width = '35px'>
                         </td>
                     </tr>
                     <tr>
-                        <td>Select Product Image 4: </td>
+                        <td>Ảnh sản phẩm 4: </td>
                         <td>
                         <input type='file' name = 'img4'>
                         <img src = '../img/products_img/".$row['img4']."' width = '35px'>
                         </td>
                     </tr>
                     <tr>
-                        <td>Enter Feature 1: </td>
-                        <td><input type='text' name = 'feature1' value = '".$row['feature1']."' Placeholder = 'Enter product Feature'></td>
+                        <td>Mô tả 1: </td>
+                        <td><input type='text' name = 'feature1' value = '".$row['feature1']."' Placeholder = 'Nhập mô tả sản phẩm'></td>
                     </tr>
                     <tr>
-                        <td>Enter Feature 2: </td>
-                        <td><input type='text' name = 'feature2' value = '".$row['feature2']."' Placeholder = 'Enter product Feature'></td>
+                        <td>Mô tả 2: </td>
+                        <td><input type='text' name = 'feature2' value = '".$row['feature2']."' Placeholder = 'Nhập mô tả sản phẩm'></td>
                     </tr>
                     <tr>
-                        <td>Enter Feature 3: </td>
-                        <td><input type='text' name = 'feature3' value = '".$row['feature3']."' Placeholder = 'Enter product Feature'></td>
+                        <td>Mô tả 3: </td>
+                        <td><input type='text' name = 'feature3' value = '".$row['feature3']."' Placeholder = 'Nhập mô tả sản phẩm'></td>
                     </tr>
                     <tr>
-                        <td>Enter Feature 4: </td>
-                        <td><input type='text' name = 'feature4' value = '".$row['feature4']."' Placeholder = 'Enter product Feature'></td>
+                        <td>Mô tả 4: </td>
+                        <td><input type='text' name = 'feature4' value = '".$row['feature4']."' Placeholder = 'Nhập mô tả sản phẩm'></td>
                     </tr>
                     <tr>
-                        <td>Enter Price: </td>
-                        <td><input type='text' name = 'price' value = '".$row['price']."' Placeholder = 'Enter product Price'></td>
+                        <td>Nhập giá: </td>
+                        <td><input type='text' name = 'price' value = '".$row['price']."' Placeholder = 'Nhập giá></td>
                     </tr>
                     <tr>
-                        <td>Enter Model No.: </td>
-                        <td><input type='text' name = 'model' value = '".$row['pro_model']."' Placeholder = 'Enter Model number'></td>
+                        <td>Nhập mã model.: </td>
+                        <td><input type='text' name = 'model' value = '".$row['pro_model']."' Placeholder = 'Nhập mã model'></td>
                     </tr>
                     <tr>
-                        <td>Enter Warranty: </td>
-                        <td><input type='text' name = 'warranty' value = '".$row['warranty']."' Placeholder = 'Enter product Warranty'></td>
+                        <td>Bảo hành: </td>
+                        <td><input type='text' name = 'warranty' value = '".$row['warranty']."' Placeholder = 'Nhập thời gian bảo hành'></td>
                     </tr>
                     <tr>
-                        <td>For Whom: </td>
-                        <td>
-                            <select name='for_whom' >";
-                                echo "<option value='".$row['for_whom']."'>".$row['for_whom']."</option>
-                                <option value='All'>All</option>
-                                <option value='Men'>Men</option>
-                                <option value='Women'>Women</option>
-                                <option value='Kids'>Kids</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Enter Product Keywords: </td>
-                        <td><input type='text' name = 'key' value = '".$row['keyword']."' Placeholder = 'Enter product Keyword'></td>
+                        <td>Nhập Keyword: </td>
+                        <td><input type='text' name = 'key' value = '".$row['keyword']."' Placeholder = 'Nhập keyword'></td>
                     </tr>
                 </table>
                 <center>
-                    <button type = 'submit' name = 'update_product'>Update Product</button>
+                    <button type = 'submit' name = 'update_product'>Cập nhật sản phẩm</button>
                 </center>
             </form>
                 ";
@@ -425,7 +450,6 @@
             $feature4 = $_POST['feature4'];
             $price = $_POST['price'];
             $waranty = $_POST['warranty'];
-            $for_whom = $_POST['for_whom'];
             $key = $_POST['key'];
             $model_no = $_POST['model'];
 
@@ -470,16 +494,15 @@
                     price='$price', 
                     pro_model=' $model_no', 
                     warranty=' $waranty',
-                    for_whom='$for_whom',
                     keyword=' $key', 
                     date_added='$today'
                     WHERE pro_id = $product_id"
                 );
                 if($stmt->execute()){
-                    echo "<script>alert('Product has been Updated successfully');</script>";
+                    echo "<script>alert('Sản phẩm cập nhật thành công');</script>";
                     echo "<script>window.open('index.php?view_product', '_self')</script>";
                 }else{
-                    echo "<script>alert('Product  Update failed!');</script>";
+                    echo "<script>alert('Cập nhật sản phẩm thất bại!');</script>";
                 }
 
             }
@@ -494,7 +517,7 @@
             $stmt = $con->prepare("DELETE FROM main_cat WHERE cat_id = $cat_id");
             $stmt->setFetchMode(PDO:: FETCH_ASSOC);
             if($stmt->execute())
-            echo "<script>alert('Category deleted Successfuly')</script>";
+            echo "<script>alert('Xóa danh mục thanh công')</script>";
             echo "<script>window.open('index.php?add_category', '_self')</script>";
         }
         if(isset($_POST['0'])){
@@ -508,7 +531,7 @@
             $stmt = $con->prepare("DELETE FROM sub_cat WHERE subcat_id = $subcat_id");
             $stmt->setFetchMode(PDO:: FETCH_ASSOC);
             if($stmt->execute())
-            echo "<script>alert('Sub Category deleted Successfuly')</script>";
+            echo "<script>alert('Xóa danh mục mở rộng thành công')</script>";
             echo "<script>window.open('index.php?add_subcat', '_self')</script>";
         }
         if(isset($_POST['0'])){
@@ -523,7 +546,7 @@
             $stmt = $con->prepare("DELETE FROM products WHERE pro_id = $prod_id");
             $stmt->setFetchMode(PDO:: FETCH_ASSOC);
             if($stmt->execute())
-            echo "<script>alert('Product has been deleted Successfuly')</script>";
+            echo "<script>alert('Xóa sản phẩm thành công')</script>";
             echo "<script>window.open('index.php?view_product', '_self')</script>";
         }
         if(isset($_POST['0'])){

@@ -8,12 +8,13 @@
                 <th>Tên danh mục</th>
                 <th>Sửa</th>
                 <th>Xóa</th>
+                <th>Ảnh</th>
             </tr>
                 <?php echo view_subcat(); ?>
         </table>
     </form>  
 <h3 id="add-cat">Thêm danh mục mở rộng ở đây</h3>
-<form action="" method="POST" autocomplete = "off">
+<form action="" method="POST" autocomplete = "off" enctype="multipart/form-data">
         <table>
             <tr>
                 <td>Chọn danh mục: </td>
@@ -27,6 +28,10 @@
             <tr>
                 <td>Nhập tên danh mục mở rộng: </td>
                 <td><input type="text" name = "cat_name" Placeholder = "Nhập tên danh mục mở rộng"></td>
+            </tr>
+            <tr>
+                <td>Ảnh danh mục mở rộng: </td>
+                <td><input type='file' name = 'imgsc'></td>
             </tr>
         </table>
         <center>
